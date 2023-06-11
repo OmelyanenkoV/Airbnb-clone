@@ -1,5 +1,5 @@
 'use client'
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form'
 import { signIn } from 'next-auth/react'
 
@@ -19,6 +19,11 @@ const LoginModal = () => {
     const router = useRouter()
     const loginModal = useLoginModal()
     const registerModal = useRegisterModal()
+
+    const toggle = useCallback(() => {
+        loginModal.onClose()
+        registerModal.onOpen()
+    }, [loginModal, registerModal])
 
     const [isLoading, setIsLoading] = useState(false)
 
@@ -94,12 +99,12 @@ const LoginModal = () => {
                 <div className={`flex flex-row gap-2 justify-center`}>
                     <div>
                         <p>
-                            Already have an account?
+                           First time using Airbnb?
                         </p>
                     </div>
-                    <div onClick={loginModal.onClose}>
+                    <div onClick={toggle}>
                         <p className={`text-neutral-800 cursor-pointer hover:underline`}>
-                            Log in
+                            Sign up
                         </p>
                     </div>
                 </div>

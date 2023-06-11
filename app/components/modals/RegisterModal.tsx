@@ -1,5 +1,5 @@
 'use client'
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import axios from 'axios'
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form'
 
@@ -12,11 +12,18 @@ import Button from "@/app/components/Button";
 import {FcGoogle} from "react-icons/fc";
 import {AiFillGithub} from "react-icons/ai";
 import {signIn} from "next-auth/react";
+import useLoginModal from "@/app/components/hooks/useLoginModal";
 
 
 const RegisterModal = () => {
-    const registerModel = useRegisterModal()
+    const registerModal = useRegisterModal()
+    const loginModal = useLoginModal()
     const [isLoading, setIsLoading] = useState(false)
+
+    const toggle = useCallback(() => {
+        loginModal.onOpen()
+        registerModal.onClose()
+    }, [loginModal, registerModal])
 
     const {
         register,
@@ -34,7 +41,7 @@ const RegisterModal = () => {
         setIsLoading(true)
         axios.post('/api/register', data)
             .then(() => {
-                registerModel.onClose()
+                registerModal.onClose()
             })
             .catch(() => {
                 toast.error('Something went wrong')
@@ -101,7 +108,7 @@ const RegisterModal = () => {
                             Already have an account?
                         </p>
                     </div>
-                    <div onClick={registerModel.onClose}>
+                    <div onClick={toggle}>
                         <p className={`text-neutral-800 cursor-pointer hover:underline`}>
                             Log in
                         </p>
@@ -115,10 +122,10 @@ const RegisterModal = () => {
     return (
         <Modal
             disabled={isLoading}
-            isOpen={registerModel.isOpen}
+            isOpen={registerModal.isOpen}
             title={`Register`}
             actionLabel={`Continue`}
-            onClose={registerModel.onClose}
+            onClose={registerModal.onClose}
             onSubmit={handleSubmit(onSubmit)}
             body={bodyContent}
             footer={footerContent}

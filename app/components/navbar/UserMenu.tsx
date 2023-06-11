@@ -7,6 +7,9 @@ import useRegisterModal from "@/app/components/hooks/useRegisterModal";
 import useLoginModal from "@/app/components/hooks/useLoginModal";
 import {User} from "@prisma/client";
 import {signOut} from "next-auth/react";
+import toast from "react-hot-toast";
+import rentModal from "@/app/components/modals/RentModal";
+import useRentModal from "@/app/components/hooks/useRentModal";
 
 interface UserMenuProps {
     currentUser?: User | null
@@ -17,16 +20,37 @@ const UserMenu: React.FC<UserMenuProps> = ({
 }) => {
     const registerModal = useRegisterModal()
     const loginModal = useLoginModal()
+    const rentModal = useRentModal()
     const [isOpen, setIsOpen] = useState(false)
+
     const toggleOpen = useCallback(() => {
         setIsOpen((value) => !value)
     }, [])
+
+    const onRent = useCallback(() => {
+        if (!currentUser) {
+            toast.error('Please login first')
+            return loginModal.onOpen()
+        }
+
+        rentModal.onOpen()
+    }, [currentUser, loginModal, rentModal])
+
+    const menuItemsLoggedInUser = [
+        { label: 'My trips', onClick: () => {} },
+        { label: 'My favorites', onClick: () => {} },
+        { label: 'My Reservation', onClick: () => {} },
+        { label: 'My properties', onClick: () => {} },
+        { label: 'Airbnb my home', onClick: rentModal.onOpen },
+        { label: 'Logout', onClick: signOut }
+    ];
+
     return (
         <div className='relative'>
             <div className="flex flex-row items-center gap-3">
                 <div
                     className='hidden md:block text-sm font-semibold py-3 px-4 rounded-full hover:bg-neutral-100 transition cursor-pointer'
-                    onClick={() => {}}
+                    onClick={onRent}
                 >
                     Airbnb your home
                 </div>
@@ -45,13 +69,14 @@ const UserMenu: React.FC<UserMenuProps> = ({
                     <div className='flex flex-col cursor-pointer'>
                         { currentUser ? (
                             <>
-                                <MenuItem onClick={() => {}} label={'My trips'}/>
-                                <MenuItem onClick={() => {}} label={'My favorites'}/>
-                                <MenuItem onClick={() => {}} label={'My Reservation'}/>
-                                <MenuItem onClick={() => {}} label={'My properties'}/>
-                                <MenuItem onClick={() => {}} label={'Airbnb my home'}/>
-                                <hr/>
-                                <MenuItem onClick={() => signOut()} label={'Logout'}/>
+                                { menuItemsLoggedInUser.map((item, index) => (
+                                    <MenuItem
+                                        key={index}
+                                        onClick={item.onClick}
+                                        label={item.label}
+                                    />
+                                ))}
+                                <hr />
                             </>
                         ) : (
                             <>
